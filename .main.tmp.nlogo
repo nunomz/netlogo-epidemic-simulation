@@ -105,7 +105,7 @@ to movimentar-todos ;como juntar
 end
 
 to infeccao
-  set breed infetados
+
   set shape "face sad"
   set color red
   set dias-desde-infecao 0

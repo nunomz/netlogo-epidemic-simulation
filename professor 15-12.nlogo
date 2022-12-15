@@ -1,200 +1,27 @@
-globals [ percentagem-infetados ]
+extensions [sound]
 
-breed [ populacao pessoa]
-populacao-own [ idade ]
-
-breed [ infetados infetado ]
-infetados-own [ dias-desde-infecao contagia? sintomas? lista-de-contagios ]
-
-patches-own [ terreno? dias ]
-
-;TODO:
-; -adicionar botao que permite guardar estado atual da simulacao
-
+patches-own [duracao]
 
 to iniciar
   clear-all
-  preparar-terreno
-  instalar-populacao
-  instalar-infetados
+  ask patches [
+    set pcolor random 128
+    set duracao (10 + random 100) / 100
+  ]
   reset-ticks
 end
 
-to  preparar-terreno ;em vez de criar pasto vamos criar paredes, por isso temos de alterar algumas coisas
-  ask patches [set terreno? true set pcolor white]
-  ask n-of (((100 - percentagem-terreno) / 100) * (count patches)) patches [
-    set terreno? false
-    set pcolor gray
-  ]
-  set percentagem-infetados  percentagem-inicial-infetados
-end
+to andar
+  ask turtles[
+    right (random 180) - 90
+    forward 1
 
-to instalar-populacao ;podemos utilizar o que está comentado caso queiramos diferenciar mulher/homem
-  create-populacao ((100 - percentagem-infetados) / 100) * populacao-inicial [
-    set shape "face happy"
-    set color green
-    set xcor random max-pxcor * one-of [ 1 -1]
-    set ycor random max-pycor * one-of [ 1 -1]
-    ;set energia random 1000 + 500
-    ;set genero "macho"
-    ;set idade random (Tempo-de-Vida * 365) + 1
-    ;set dias-de-gravidez 0
-    ;set dias-apos-parto 0
   ]
 end
 
-to instalar-infetados
-  create-infetados (percentagem-infetados / 100) * populacao-inicial [
-    set shape "face sad"
-    set color red
-    set dias-desde-infecao 0
-    set sintomas? false
-    set contagia? false
-    set xcor random max-pxcor * one-of [1 -1]
-    set ycor random max-pycor * one-of [1 -1]
-    ;set size 2
-    ;set energia random 1000 + 500
-    ;ifelse (energia < 1000) [set fome? true] [set fome? false]
-    ;set lista-de-infeccoes []
-  ]
+to produz_som
+  sound:play-note "TRUMPET" pcolor 64 0.5
 end
-
-to simular
-;  ver-relacoes
-  movimentar-todos
-  atualizar-mundo
-  infetar
-;  while [mouse-inside?] [alterar-mundo]
-;  if ((count herbivoros = 0) and (count carnivoros = 0)) [stop]
-;  tick
-end
-
-to  atualizar-mundo
-  atualizar-animais
-  ;atualizar-terreno
-end
-
-to  atualizar-animais
-  ask populacao [set idade idade + 1]
-  ;ask populacao with [genero = "femea" and dias-de-gravidez > 0] [ set dias-de-gravidez dias-de-gravidez + 1 ]
-  ;ask populacao with [genero = "femea" and dias-de-gravidez = 0 and idade >= idade-adulta] [ set dias-apos-parto dias-apos-parto + 1 ]
-  ;ask populacao  with [ energia <= 0 or idade > (Tempo-de-Vida * 365) ][die]
-  ask infetados [
-    set dias-desde-infecao dias-desde-infecao + 1 ;incrementa dias
-    if (dias-desde-infecao >= periodo-de-incubacao) [set sintomas? true]
-    ifelse (infeciona-antes-sintomas?) [
-      if (dias-desde-infecao >= periodo-de-infeccao) [set contagia? true]
-    ] [
-      if (dias-desde-infecao >= periodo-de-incubacao) [set contagia? true]
-    ]
-  ]
- end
-
-
-to movimentar-todos ;como juntar
-  ask populacao [
-    if (any? neighbors with [terreno?]) [
-      move-to one-of neighbors with [pcolor = white]
-    ]
-  ]
-  ask infetados [
-    if (any? neighbors with [terreno?]) [
-      move-to one-of neighbors with [pcolor = white]
-    ]
-  ]
-end
-
-to infeccao
-  set breed infetados
-  set shape "face sad"
-  set color red
-  set dias-desde-infecao 0
-  set sintomas? false
-  set contagia? false
-end
-
-to infetar
-  let herb 0
-  ask infetados[
-    if (contagia? and any? populacao-here) [
-      ask one-of populacao-here [set herb who infeccao]
-      ;set energia (energia + 500)
-      ;set lista-de-abates lput (list herb ticks xcor ycor) lista-de-abates
-      ;if (energia > 1000) [set fome? false]
-    ]
-  ]
-end
-
-
-;to alterar-mundo
-;  if (mouse-down?)[
-;    ifelse (any? turtles with [distancexy mouse-xcor mouse-ycor < 1]) [
-;      let animal one-of turtles with [distancexy mouse-xcor mouse-ycor < 1]
-;
-;      if (is-carnivoro? animal and ver-abates) [
-;        output-write "Carnivoro: "
-;        output-print [who] of animal
-;        ask animal [
-;          foreach lista-de-abates [[abate] ->
-;            output-write "Herbívoro: "
-;            output-write item 0 abate
-;            output-write "Dia: "
-;            output-write item 1 abate
-;            output-write "X: "
-;            output-write item 2 abate
-;            output-write "Y: "
-;            output-write item 3 abate
-;            output-print ""
-;          ]
-;        ]
-;        output-print "---------------------------------------------------"
-;      ]
-;
-;      while [mouse-down?] [
-;        ask animal [set xcor mouse-xcor set ycor mouse-ycor]
-;      ]
-;    ]
-;    [
-;      ask patch mouse-xcor mouse-ycor [
-;        ifelse (pasto?) [
-;          set pcolor brown
-;          set dias 0
-;          set pasto? false
-;        ][
-;          set pcolor 68
-;          set dias dias-crescer
-;          set pasto? true
-;        ]
-;      ]
-;    ]
-;  ]
-;end
-;
-;to ver-relacoes
-;  ask links with [label = "casal"] [
-;    ifelse (ver-casais) [set hidden? false] [set hidden? true]
-;  ]
-;  ask links with [label = "filho" or label = "filha"] [
-;    ifelse (ver-filhos) [set hidden? false] [set hidden? true]
-;  ]
-;end
-;
-;
-;
-;
-;
-
-;
-;
-;to  alimentar-herbivoros
-;  ask herbivoros[
-;    if ([pasto?] of patch xcor ycor = true )[
-;      set energia energia + ( 50 + 10 * ( 68 - [pcolor] of patch xcor ycor ))
-;      ask patch xcor ycor [ set pasto? false set pcolor brown set dias 0]
-;    ]
-;  ]
-;end
-;
 @#$#@#$#@
 GRAPHICS-WINDOW
 407
@@ -257,36 +84,6 @@ NIL
 NIL
 1
 
-SLIDER
-34
-144
-263
-177
-percentagem-inicial-infetados
-percentagem-inicial-infetados
-0
-100
-25.0
-1
-1
-%
-HORIZONTAL
-
-SLIDER
-34
-186
-263
-219
-populacao-inicial
-populacao-inicial
-0
-1000
-107.0
-1
-1
-pessoas
-HORIZONTAL
-
 BUTTON
 236
 56
@@ -303,99 +100,6 @@ NIL
 NIL
 NIL
 1
-
-MONITOR
-1081
-60
-1171
-105
-Nº Saudáveis
-count populacao
-17
-1
-11
-
-SLIDER
-31
-269
-262
-302
-periodo-de-incubacao
-periodo-de-incubacao
-0
-15
-5.0
-1
-1
-dias
-HORIZONTAL
-
-SLIDER
-30
-314
-263
-347
-periodo-de-infeccao
-periodo-de-infeccao
-1
-15
-23.0
-1
-1
-dias
-HORIZONTAL
-
-MONITOR
-1080
-125
-1170
-170
-Nº Infetados
-count infetados
-17
-1
-11
-
-SLIDER
-32
-225
-265
-258
-percentagem-terreno
-percentagem-terreno
-0
-100
-80.0
-1
-1
-%
-HORIZONTAL
-
-SWITCH
-31
-362
-261
-395
-infeciona-antes-sintomas?
-infeciona-antes-sintomas?
-1
-1
--1000
-
-SLIDER
-30
-412
-262
-445
-tempo-de-vida
-tempo-de-vida
-5
-20
-10.0
-1
-1
-dias
-HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
