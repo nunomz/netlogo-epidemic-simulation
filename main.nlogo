@@ -221,8 +221,9 @@ to Guardar
   file-close
   sound:play-note "Applause" 60 64 2
   sound:play-note "Goblins" 30 20 1
-  sound:play-note "Bird Tweet" 59 20 3
+  sound:play-note "Bird Tweet" 59 20 2
   sound:play-drum "Hand Clap" 64
+  user-message "Guardado com sucesso"
 end
 
 to Repor
@@ -252,10 +253,12 @@ to Repor
   [
     user-message "Impossivel recuperar o mundo!!!"
   ]
-  sound:play-note "Helicopter" 40 64 3
   sound:play-note "Telephone Ring" 60 64 2
-  sound:play-note "Sci-fi" 10 30 3
+  sound:play-note "Sci-fi" 10 30 2
   sound:play-drum "Maracas" 64
+  wait 2
+  sound:play-note "Helicopter" 40 50 2.5
+  sound:play-note "Sci-fi" 10 10 3
 end
 ;
 @#$#@#$#@
