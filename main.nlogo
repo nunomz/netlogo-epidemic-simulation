@@ -1,3 +1,5 @@
+extensions [ sound ]
+
 globals [ percentagem-infetados ]
 
 breed [ populacao pessoa]
@@ -194,6 +196,67 @@ end
 ;    ]
 ;  ]
 ;end
+
+to Guardar
+  if (file-exists? "Terreno.txt") [file-delete "Terreno.txt"]
+  if (file-exists? "populacao.txt") [file-delete "populacao.txt"]
+  file-open "Terreno.txt"
+  ask patches [
+    file-write pxcor
+    file-write pycor
+    file-write pcolor
+  ]
+  file-close
+
+  file-open "populacao.txt"
+  file-write populacao-inicial
+  ask turtles [
+    file-write who
+    file-write xcor
+    file-write ycor
+    file-write heading
+    file-write shape
+    file-write color
+  ]
+  file-close
+  sound:play-note "Applause" 60 64 2
+  sound:play-note "Goblins" 30 20 1
+  sound:play-note "Bird Tweet" 59 20 3
+  sound:play-drum "Hand Clap" 64
+end
+
+to Repor
+  ifelse (file-exists? "Terreno.txt" and file-exists? "populacao.txt")
+  [
+    clear-all
+    file-open "Terreno.txt"
+    while [not file-at-end?] [
+      ask patch file-read file-read [set pcolor file-read]
+    ]
+    file-close
+
+    file-open "populacao.txt"
+    create-turtles file-read [
+     while [not file-at-end?] [
+        ask turtle file-read[
+          set xcor file-read
+          set ycor file-read
+          set heading file-read
+          set shape file-read
+          set color file-read
+        ]
+    ]
+    ]
+    file-close
+  ]
+  [
+    user-message "Impossivel recuperar o mundo!!!"
+  ]
+  sound:play-note "Helicopter" 40 64 3
+  sound:play-note "Telephone Ring" 60 64 2
+  sound:play-note "Sci-fi" 10 30 3
+  sound:play-drum "Maracas" 64
+end
 ;
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -266,7 +329,7 @@ percentagem-inicial-infetados
 percentagem-inicial-infetados
 0
 100
-25.0
+26.0
 1
 1
 %
@@ -396,6 +459,40 @@ tempo-de-vida
 1
 dias
 HORIZONTAL
+
+BUTTON
+38
+473
+115
+506
+NIL
+Guardar
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+127
+474
+192
+507
+NIL
+Repor
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
