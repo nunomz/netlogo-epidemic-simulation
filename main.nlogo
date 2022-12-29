@@ -10,10 +10,6 @@ infetados-own [ dias-desde-infecao contagia? sintomas? lista-de-contagios ]
 
 patches-own [ terreno? dias ]
 
-;TODO:
-; -adicionar botao que permite guardar estado atual da simulacao
-
-
 to iniciar
   clear-all
   preparar-terreno
@@ -33,10 +29,13 @@ end
 
 to instalar-populacao ;podemos utilizar o que está comentado caso queiramos diferenciar mulher/homem
   create-populacao ((100 - percentagem-infetados) / 100) * populacao-inicial [
+    while [ ([pcolor] of patch xcor ycor = gray ) or (any? other turtles-here)] [
     set shape "face happy"
     set color green
     set xcor random max-pxcor * one-of [ 1 -1]
     set ycor random max-pycor * one-of [ 1 -1]
+    set heading one-of [0 90 180 270]
+    ]
     ;set energia random 1000 + 500
     ;set genero "macho"
     ;set idade random (Tempo-de-Vida * 365) + 1
@@ -47,6 +46,7 @@ end
 
 to instalar-infetados
   create-infetados (percentagem-infetados / 100) * populacao-inicial [
+    while [ ([pcolor] of patch xcor ycor = gray ) or (any? other turtles-here)] [
     set shape "face sad"
     set color red
     set dias-desde-infecao 0
@@ -54,6 +54,8 @@ to instalar-infetados
     set contagia? false
     set xcor random max-pxcor * one-of [1 -1]
     set ycor random max-pycor * one-of [1 -1]
+    set heading one-of [0 90 180 270]
+    ]
     ;set size 2
     ;set energia random 1000 + 500
     ;ifelse (energia < 1000) [set fome? true] [set fome? false]
@@ -347,7 +349,7 @@ populacao-inicial
 populacao-inicial
 0
 1000
-107.0
+37.0
 1
 1
 pessoas
@@ -431,7 +433,7 @@ percentagem-terreno
 percentagem-terreno
 0
 100
-80.0
+78.0
 1
 1
 %
