@@ -34,17 +34,21 @@ to  preparar-terreno ;criar paredes com base na percentagem-terreno
   ]
 end
 
-to instalar-populacao ;
-  set-default-shape populacao "person"
-  set num_mortos 0
+to instalar-populacao
   create-populacao populacao-inicial [
+    set xcor random-pxcor
+    set ycor random-pycor
+    while [ ([pcolor] of patch xcor ycor = grey - 2.5 ) or (any? other turtles-here)] [ set xcor random-pxcor set ycor random-pycor]
+    set shape  "person"
     set color green
+    set num_mortos 0
     play-suscetivel
     set xcor random max-pxcor * one-of [ 1 -1]
     set ycor random max-pycor * one-of [ 1 -1]
     set heading one-of [0 90 180 270]
+]
     ;set virus-recuperado-period random virus-check-frequency
-  ]
+
 end
 
 to instalar-virus
@@ -71,6 +75,30 @@ to simular
   tick
   ;JGN-network
 end
+
+;to alterar-mundo
+ ; if (mouse-down?) [
+  ;  ifelse (any? turtles with [ distancexy mouse-xcor mouse-ycor < 1]) [
+  ;   let create-populacao one-of turtles with [ distancexy mouse-xcor mouse-ycor < 1]
+
+   ;  output-write "Pessoa: "
+
+  ;    while [mouse-down?] [
+   ;     ask create-populacao [set xcor mouse-xcor set ycor mouse-ycor]
+   ;   ]
+   ; ]
+   ; [
+ ;     ask  patch mouse-xcor mouse-ycor [
+    ;    ifelse (terreno?)[
+    ;    set pcolor white
+    ;    ]
+      ;  [
+    ;    set pcolor gray - 2.5
+    ;    ]
+   ;   ]
+   ; ]
+  ;]
+;End
 
 to interagir-agentes
   ask populacao ;with [infetado?]
