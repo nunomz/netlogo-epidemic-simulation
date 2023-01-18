@@ -1,6 +1,6 @@
 extensions [ sound ]
 
-globals [ r0 r1 R Z* num_mortos]
+globals [ num_mortos show-contact_links?]
 
 breed [ populacao pessoa]
 
@@ -11,34 +11,51 @@ populacao-own [ ; propriedades das pessoas
   exposto?
   recuperado?
   virus?
+  quarentena?
   dias-desde-recuperacao
+  dias-de-quarentena
 ]
 
-
-patches-own [ terreno? dias ]
+patches-own [ predio? dias ]
 
 to iniciar
-  ;clear-all
-  __clear-all-and-reset-ticks
+  clear-all
   instalar-populacao
-  ;JGN-network
   preparar-terreno
+  set show-contact_links? true
   reset-ticks
 end
 
 to  preparar-terreno ;criar paredes com base na percentagem-terreno
-  ask patches [set terreno? true set pcolor white]
-  ask n-of (((100 - percentagem-terreno) / 100) * (count patches)) patches [
-    set terreno? false
-    set pcolor gray - 2.5
+  ask patches [set predio? false set pcolor 9.5]
+  ask n-of (((100 - percentagem-terreno) / 100) * (count patches)) patches with [any? other populacao-here = false]  [
+    set predio? true
+    set pcolor 2.5
   ]
 end
 
 to instalar-populacao
+;  ask n-of 1 patches with [pcolor = 9.5] [
+;    sprout populacao-inicial [
+;      ;set xcor random-pxcor
+;      ;set ycor random-pycor
+;      while [ ([pcolor] of patch xcor ycor = grey - 2.5 ) or (any? other populacao-here)] [ set xcor random-pxcor set ycor random-pycor]
+;      set shape  "person"
+;      set color green
+;      set num_mortos 0
+;      play-suscetivel
+;      set xcor random max-pxcor * one-of [ 1 -1]
+;      set ycor random max-pycor * one-of [ 1 -1]
+;      set heading one-of [0 90 180 270]
+;    ]
+;  ]
   create-populacao populacao-inicial [
     set xcor random-pxcor
     set ycor random-pycor
-    while [ ([pcolor] of patch xcor ycor = grey - 2.5 ) or (any? other turtles-here)] [ set xcor random-pxcor set ycor random-pycor]
+    ;while [ ([pcolor] of patch xcor ycor = 2.5 ) or (any? other populacao-here)] [ set xcor random-pxcor set ycor random-pycor]
+    ;while (patch-here with [predio? = true]) [ set xcor random-pxcor set ycor random-pycor]
+    ;while [[pcolor] of patch-here = 2.5][ set xcor random-pxcor set ycor random-pycor]
+    while [ ([predio?] of patch xcor ycor != false )] [ set xcor random-pxcor set ycor random-pycor]
     set shape  "person"
     set color green
     set num_mortos 0
@@ -46,14 +63,14 @@ to instalar-populacao
     set xcor random max-pxcor * one-of [ 1 -1]
     set ycor random max-pycor * one-of [ 1 -1]
     set heading one-of [0 90 180 270]
-]
+  ]
     ;set virus-recuperado-period random virus-check-frequency
 
 end
 
 to instalar-virus
   ask n-of ((percentagem-inicial-infetados / 100) * count populacao) populacao [
-    play-infetado
+    play-exposto
   ]
 end
 
@@ -63,58 +80,111 @@ to simular
 ;    if virus-recuperado-period >= virus-check-frequency
 ;       [ set virus-recuperado-period 0 ]
 ;  ]
+
+  ;; IMUNIDADE
   ask populacao with [recuperado?]
   [
     if dias-desde-recuperacao >= periodo-imunidade [ play-suscetivel ]
     set dias-desde-recuperacao dias-desde-recuperacao + 1
   ]
+  ask populacao with [infetado?]
+  [
+    if random 100 < prob-quarentena [ set quarentena? true]
+  ]
+  ask populacao with [quarentena? = true]
+  [
+    ifelse dias-de-quarentena >= periodo-quarentena
+    [
+      set quarentena? false
+      play-suscetivel
+
+    ][
+      play-quarentena
+    ]
+    set dias-desde-recuperacao dias-desde-recuperacao + 1
+  ]
+  criar-links
   interagir-agentes
-;  while [mouse-inside?] [alterar-mundo]
-;  if ((count herbivoros = 0) and (count carnivoros = 0)) [stop]
   virus-check
+  movimentar-agentes
   tick
-  ;JGN-network
+end
+
+
+to movimentar-agentes
+  ask populacao [
+    if (any? neighbors with [pcolor = 9.5]) [
+      move-to one-of neighbors
+    ]
+  ]
 end
 
 ;to alterar-mundo
- ; if (mouse-down?) [
-  ;  ifelse (any? turtles with [ distancexy mouse-xcor mouse-ycor < 1]) [
-  ;   let create-populacao one-of turtles with [ distancexy mouse-xcor mouse-ycor < 1]
+;  if (mouse-down?) [
+;    ifelse (any? turtles with [ distancexy mouse-xcor mouse-ycor < 1]) [
+;     let create-populacao one-of turtles with [ distancexy mouse-xcor mouse-ycor < 1]
+;
+;     output-write "Pessoa: "
+;
+;      while [mouse-down?] [
+;        ask create-populacao [set xcor mouse-xcor set ycor mouse-ycor]
+;      ]
+;    ]
+;    [
+;      ask  patch mouse-xcor mouse-ycor [
+;        ifelse (terreno?)[
+;        set pcolor 9.5
+;        ]
+;        [
+;        set pcolor gray - 2.5
+;        ]
+;      ]
+;    ]
+;  ]
+;end
 
-   ;  output-write "Pessoa: "
+; links/interaccao entre agentes
 
-  ;    while [mouse-down?] [
-   ;     ask create-populacao [set xcor mouse-xcor set ycor mouse-ycor]
-   ;   ]
-   ; ]
-   ; [
- ;     ask  patch mouse-xcor mouse-ycor [
-    ;    ifelse (terreno?)[
-    ;    set pcolor white
-    ;    ]
-      ;  [
-    ;    set pcolor gray - 2.5
-    ;    ]
-   ;   ]
-   ; ]
+to criar-links
+  ask populacao with [ exposto? = true] [
+    if (any? populacao with [exposto? = false and distance myself < raio_influencia]) [
+      create-links-with other populacao with [exposto? = false and distance myself < raio_influencia] [
+        set label "contacto"
+        set color black
+      ]
+    ]
+  ]
+end
+
+to ver-relacoes
+  ;ask links with [label = "contacto"] [
+  ifelse (ver-contactos) [
+    ask links with [label = "contacto"] [set hidden? false]
+    ]
+  [
+    ask links with [label = "contacto"] [set hidden? true]
+  ]
   ;]
-;End
+end
+
+; transmissao entre agentes
 
 to interagir-agentes
-  ask populacao ;with [infetado?]
+  ask populacao with [virus?]
     [
-;      if count my-links > 0
-;      [
-;      ask one-of link-neighbors
-;        [
-;          ;; interaction
+      if count my-links > 0
+      [
+      ask link-neighbors
+        [
+          ;; interaction
           if not recuperado? and random-float 100 < prob-exposicao
             [ play-exposto ]
-;         ]
-;      ]
-      ask n-of ((taxa-mortalidade / 100) * count populacao with [infetado?]) populacao with [infetado?] [ play-morto ]
+         ]
+      ]
+      ;ask n-of ((taxa-mortalidade / 100) * count populacao with [infetado?]) populacao with [infetado?] [ play-morto ]
     ]
 end
+
 
 to virus-check
   ask populacao with [infetado?]
@@ -123,15 +193,32 @@ to virus-check
     [
       play-recuperado
     ]
+    if random 100 < taxa-mortalidade
+    [
+      play-morto
+    ]
   ]
   ask populacao with [exposto?]
   [
-    if random-float 100 < prob-infeccao
+    if random 100 < prob-infeccao
     [
       play-infetado
     ]
   ]
 end
+
+; Quarentena
+
+to play-quarentena ;while not at gray patch, move to gray patch
+  ask populacao with [quarentena? = true and pcolor = white] [
+    let target-patch min-one-of (patches in-radius 25 with [pcolor = 2.5]) [distance myself]
+    if target-patch != nobody  [
+      move-to target-patch
+    ]
+  ]
+end
+
+; Roles
 
 to play-morto
   set num_mortos num_mortos + 1
@@ -168,92 +255,25 @@ to play-recuperado  ;; agent plays the recuperado role
   set infetado? false
   set exposto? false
   set recuperado? true
-   set virus? false
+  set virus? false
   set color gray
+  ask my-links [die]
 end
 
-; ESTE CODIGO E MUITO BONITO MAS SO ESCOLHE UM AGENTE RANDOM PARA INFETAR
-;to JGN-network    ;; social network dynamically grows
-;  ;;; The details of this network references the work of the article "Emily M. Jin, Michelle Girvan and M. E. J. Newman,
-;  ;;;  Structure of growing social networks, Physical review E. Volume 64, 046132, 2001."
-;  ;;;
-;  set r0 0.0005
-;  set r1 2
-;  set R 0.099
-;  set Z* 5
-;
-;
-;   let add_num_links_1  0
-;   let num-links  populacao-inicial * (populacao-inicial - 1) / 2  ;np=1/2 * N(N-1)
-;    while [add_num_links_1 < num-links * r0 ]
-;    [
-;    ask one-of populacao
-;    [
-;      if count my-links < z*
-;      [
-;      let choice (one-of (other populacao with [not link-neighbor? myself]))
-;
-;
-;      if (choice != nobody)  [ create-link-with choice [ set color gray]]
-;      ]
-;       set add_num_links_1 add_num_links_1 + 1
-;    ]
-;   ]
-;  ;; some new links
-;  let nm 0
-;  ask populacao
-;  [
-;    set nm nm + (count my-links) * (count my-links - 1)
-;  ]
-;  set nm nm / 2          ;;; nm= 1/2 * links (links - 1)
-;  let add_num_links_2 0
-;  while [ add_num_links_2 < nm * r1 ]
-;    [
-;  ask one-of populacao
-;    [
-;      let agent_a self
-;      if count my-links > 0
-;    [
-;      ask one-of link-neighbors
-;      [
-;        let agent_b self
-;      if count my-links < z*
-;      [
-;        ask agent_a
-;        [
-;          ask one-of link-neighbors
-;          [
-;            if count my-links < z* and (not link-neighbor? agent_b) and agent_b != self
-;            [
-;              create-link-with agent_b [ set color gray]
-;             ]
-;          ]
-;        ]
-;      ]
-;      ]
-;    ]
-;      ]
-;       set  add_num_links_2  add_num_links_2 + 1
-;    ]
-;
-;    ;; cancel some links
-;
-;    let num_cancel_links (count links ) / 2 * R
-;    let count_cancel_links 0
-;    while [ count_cancel_links < num_cancel_links]
-;    [
-;     ask one-of populacao
-;     [
-;       if (count my-links > 0)
-;       [
-;       ask one-of my-links [ die ]
-;       ]
-;     ]
-;      set count_cancel_links count_cancel_links + 1
-;    ]
-;    ;; make the network more prettier
-;    layout-spring populacao links 0.3 (world-width / (sqrt populacao-inicial)) 1
-;end
+; Botão de
+
+to visible-links
+  ask links with [label = "contacto"] [ set hidden? not show-contact_links? ]
+end
+
+; this is called by a button Show-hide-switch
+to Show-hide-switch
+  set show-contact_links? (not show-contact_links?)
+  visible-links
+  ; or call display if necessary
+end
+
+; Guardar
 
 to Guardar
   if (file-exists? "Terreno.txt") [file-delete "Terreno.txt"]
@@ -341,8 +361,8 @@ GRAPHICS-WINDOW
 20
 -18
 18
-0
-0
+1
+1
 1
 Dias
 30.0
@@ -405,7 +425,7 @@ populacao-inicial
 populacao-inicial
 0
 1000
-355.0
+364.0
 1
 1
 pessoas
@@ -418,7 +438,7 @@ BUTTON
 129
 Instalar Vírus
 if all? populacao [not virus?]\n[\ninstalar-virus\n]
-T
+NIL
 1
 T
 OBSERVER
@@ -523,19 +543,19 @@ probabilidade-transmissao
 probabilidade-transmissao
 1
 100
-100.0
+54.0
 1
 1
 %
 HORIZONTAL
 
 SLIDER
-32
-401
-204
-434
-quarentena
-quarentena
+31
+448
+210
+481
+periodo-quarentena
+periodo-quarentena
 0
 20
 10.0
@@ -553,7 +573,7 @@ prob-recuperacao
 prob-recuperacao
 0
 100
-100.0
+49.0
 1
 1
 %
@@ -568,7 +588,7 @@ prob-infeccao
 prob-infeccao
 0
 100
-100.0
+52.0
 1
 1
 %
@@ -593,7 +613,7 @@ prob-exposicao
 prob-exposicao
 0
 100
-100.0
+50.0
 1
 1
 %
@@ -618,17 +638,17 @@ taxa-mortalidade
 taxa-mortalidade
 0
 100
-0.0
+50.0
 1
 1
 %
 HORIZONTAL
 
 TEXTBOX
-38
-440
-188
-468
+37
+487
+187
+515
 falta implementar tempo de vida  e quarentena
 11
 0.0
@@ -661,7 +681,7 @@ MONITOR
 209
 1219
 254
-Nº Recuperados (cinza)
+Nº Imunes (cinza)
 count populacao with [recuperado?]
 17
 1
@@ -676,11 +696,86 @@ periodo-imunidade
 periodo-imunidade
 0
 60
-60.0
+5.0
 1
 1
 dias
 HORIZONTAL
+
+SWITCH
+1085
+469
+1218
+502
+ver-contactos
+ver-contactos
+1
+1
+-1000
+
+SLIDER
+31
+412
+203
+445
+prob-quarentena
+prob-quarentena
+0
+100
+100.0
+1
+1
+%
+HORIZONTAL
+
+SLIDER
+28
+562
+200
+595
+raio_influencia
+raio_influencia
+0
+4
+1.5
+1
+1
+NIL
+HORIZONTAL
+
+BUTTON
+1111
+562
+1300
+595
+Mostrar/Esconder Contactos
+Show-hide-switch
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+185
+96
+318
+129
+NIL
+instalar-populacao
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
