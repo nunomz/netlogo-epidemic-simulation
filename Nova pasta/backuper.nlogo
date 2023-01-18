@@ -1,6 +1,6 @@
 extensions [ sound ]
 
-globals [ num_mortos]
+globals [ num_mortos show-contact_links?]
 
 breed [ populacao pessoa]
 
@@ -19,11 +19,10 @@ populacao-own [ ; propriedades das pessoas
 patches-own [ predio? dias ]
 
 to iniciar
-  __change-topology true true
   clear-all
   preparar-terreno
   instalar-populacao
-  movimentar-agentes
+  set show-contact_links? true
   reset-ticks
 end
 
@@ -36,10 +35,24 @@ to  preparar-terreno ;criar paredes com base na percentagem-terreno
 end
 
 to instalar-populacao
+;  ask n-of 1 patches with [pcolor = 9.5] [
+;    sprout populacao-inicial [
+;      ;set xcor random-pxcor
+;      ;set ycor random-pycor
+;      while [ ([pcolor] of patch xcor ycor = grey - 2.5 ) or (any? other populacao-here)] [ set xcor random-pxcor set ycor random-pycor]
+;      set shape  "person"
+;      set color green
+;      set num_mortos 0
+;      play-suscetivel
+;      set xcor random max-pxcor * one-of [ 1 -1]
+;      set ycor random max-pycor * one-of [ 1 -1]
+;      set heading one-of [0 90 180 270]
+;    ]
+;  ]
   create-populacao populacao-inicial [
     set xcor random-pxcor
     set ycor random-pycor
-    while [ ([pcolor] of patch xcor ycor = 2.5 )] [ set xcor random-pxcor set ycor random-pycor]
+    ;while [ ([pcolor] of patch xcor ycor = 2.5 ) or (any? other populacao-here)] [ set xcor random-pxcor set ycor random-pycor]
     ;while (patch-here with [predio? = true]) [ set xcor random-pxcor set ycor random-pycor]
     ;while [[pcolor] of patch-here = 2.5][ set xcor random-pxcor set ycor random-pycor]
     while [ ([predio?] of patch xcor ycor != false )] [ set xcor random-pxcor set ycor random-pycor]
@@ -100,11 +113,8 @@ end
 
 to movimentar-agentes
   ask populacao [
-    ifelse (( [pcolor] of patch-ahead 1 = 2.5)) [
-      set heading (heading + (90 * one-of [1 -1])) mod 360
-    ]
-    [
-      forward 1
+    if (any? neighbors with [pcolor = 9.5]) [
+      move-to one-of neighbors
     ]
   ]
 end
@@ -250,6 +260,20 @@ to play-recuperado  ;; agent plays the recuperado role
   ask my-links [die]
 end
 
+; Botão de
+
+to visible-links
+  ask links with [label = "contacto"] [ set hidden? not show-contact_links? ]
+end
+
+; this is called by a button Show-hide-switch
+to Show-hide-switch
+  set show-contact_links? (not show-contact_links?)
+  visible-links
+  ; or call display if necessary
+end
+
+
 ; Guardar
 
 to Guardar
@@ -331,8 +355,8 @@ GRAPHICS-WINDOW
 1
 1
 0
-1
-1
+0
+0
 1
 -20
 20
@@ -402,7 +426,7 @@ populacao-inicial
 populacao-inicial
 0
 1000
-168.0
+118.0
 1
 1
 pessoas
@@ -670,13 +694,13 @@ dias
 HORIZONTAL
 
 SWITCH
-547
-736
-680
-769
+469
+727
+602
+760
 ver-contactos
 ver-contactos
-1
+0
 1
 -1000
 
@@ -709,6 +733,23 @@ raio_influencia
 1
 NIL
 HORIZONTAL
+
+BUTTON
+637
+727
+826
+760
+Mostrar/Esconder Contactos
+Show-hide-switch
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 TEXTBOX
 13
@@ -791,10 +832,10 @@ Probabilidade de Recuperação (%)
 0
 
 TEXTBOX
-532
-782
-702
-820
+547
+769
+863
+807
 Definições de Visualização
 15
 0.0
@@ -840,6 +881,16 @@ PENS
 "Infetados" 1.0 0 -2674135 true "" "plot (count populacao with [infetado?]) / (count populacao) * 100"
 "Recuperados" 1.0 0 -7500403 true "" "plot (count populacao with [recuperado?]) / (count populacao) * 100"
 "Expostos" 1.0 0 -13345367 true "" "plot (count populacao with [exposto?])/(count populacao) * 100"
+
+TEXTBOX
+1017
+528
+1167
+546
+Reinfetados\n
+12
+0.0
+1
 
 PLOT
 1016

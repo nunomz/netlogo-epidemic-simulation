@@ -19,7 +19,7 @@ populacao-own [ ; propriedades das pessoas
 patches-own [ predio? dias ]
 
 to iniciar
-  __change-topology true true
+  ;__change-topology true true
   clear-all
   preparar-terreno
   instalar-populacao
@@ -676,7 +676,7 @@ SWITCH
 769
 ver-contactos
 ver-contactos
-1
+0
 1
 -1000
 
