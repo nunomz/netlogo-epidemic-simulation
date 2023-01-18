@@ -20,8 +20,8 @@ patches-own [ predio? dias ]
 
 to iniciar
   clear-all
-  instalar-populacao
   preparar-terreno
+  instalar-populacao
   set show-contact_links? true
   reset-ticks
 end
@@ -273,6 +273,7 @@ to Show-hide-switch
   ; or call display if necessary
 end
 
+
 ; Guardar
 
 to Guardar
@@ -341,13 +342,13 @@ end
 ;
 @#$#@#$#@
 GRAPHICS-WINDOW
-407
-46
-1030
-610
+266
+94
+962
+724
 -1
 -1
-15.0
+16.8
 1
 10
 1
@@ -368,10 +369,10 @@ Dias
 30.0
 
 BUTTON
-41
-55
-111
-88
+12
+33
+82
+66
 NIL
 iniciar\n
 NIL
@@ -385,10 +386,10 @@ NIL
 1
 
 BUTTON
-133
-54
-211
-87
+85
+33
+163
+66
 NIL
 simular\n
 T
@@ -402,40 +403,40 @@ NIL
 1
 
 SLIDER
-33
-181
-262
-214
+10
+212
+239
+245
 percentagem-inicial-infetados
 percentagem-inicial-infetados
 0
 100
-26.0
+23.0
 1
 1
 %
 HORIZONTAL
 
 SLIDER
-34
-137
-263
-170
+10
+174
+239
+207
 populacao-inicial
 populacao-inicial
 0
 1000
-364.0
+118.0
 1
 1
 pessoas
 HORIZONTAL
 
 BUTTON
-40
-96
-144
-129
+12
+68
+116
+101
 Instalar Vírus
 if all? populacao [not virus?]\n[\ninstalar-virus\n]
 NIL
@@ -449,10 +450,10 @@ NIL
 1
 
 MONITOR
-1077
-63
-1213
-108
+287
+44
+423
+89
 Nº Suscetíveis (verde)
 count populacao with [color = green]
 17
@@ -460,10 +461,10 @@ count populacao with [color = green]
 11
 
 MONITOR
-1081
-275
-1229
-320
+690
+44
+838
+89
 Nº Infetados (vermelho)
 count populacao with [infetado?]
 17
@@ -471,25 +472,25 @@ count populacao with [infetado?]
 11
 
 SLIDER
-32
-225
-265
-258
+9
+252
+242
+285
 percentagem-terreno
 percentagem-terreno
 0
 100
-78.0
+77.0
 1
 1
 %
 HORIZONTAL
 
 SLIDER
-34
-358
-266
-391
+8
+293
+240
+326
 tempo-de-vida
 tempo-de-vida
 5
@@ -501,10 +502,10 @@ dias
 HORIZONTAL
 
 BUTTON
-37
-276
-114
-309
+12
+103
+89
+136
 NIL
 Guardar
 NIL
@@ -518,10 +519,10 @@ NIL
 1
 
 BUTTON
-126
-277
-191
-310
+92
+103
+157
+136
 NIL
 Repor
 NIL
@@ -535,10 +536,10 @@ NIL
 1
 
 SLIDER
-24
-613
-205
-646
+6
+615
+187
+648
 probabilidade-transmissao
 probabilidade-transmissao
 1
@@ -550,25 +551,25 @@ probabilidade-transmissao
 HORIZONTAL
 
 SLIDER
-31
-448
-210
-481
+8
+505
+187
+538
 periodo-quarentena
 periodo-quarentena
 0
 20
-10.0
+11.0
 1
 1
 dias
 HORIZONTAL
 
 SLIDER
-208
-613
-380
-646
+7
+671
+179
+704
 prob-recuperacao
 prob-recuperacao
 0
@@ -580,62 +581,37 @@ prob-recuperacao
 HORIZONTAL
 
 SLIDER
-29
-661
-201
-694
-prob-infeccao
-prob-infeccao
-0
-100
-52.0
-1
-1
-%
-HORIZONTAL
-
-TEXTBOX
-36
-700
-186
-728
-probabilidade de quem já foi exposto ficar infetado
-11
-0.0
-1
-
-SLIDER
-235
-662
-407
-695
-prob-exposicao
-prob-exposicao
-0
-100
-50.0
-1
-1
-%
-HORIZONTAL
-
-TEXTBOX
-238
-701
-388
+8
 729
-probabilidade de alguem se expor ao virus
-11
+180
+762
+prob-infeccao
+prob-infeccao
+0
+100
+51.0
+1
+1
+%
+HORIZONTAL
+
+TEXTBOX
+12
+766
+162
+794
+Probabilidade de Reinfecção (%)
+10
 0.0
 1
 
 SLIDER
-428
-662
-600
-695
-taxa-mortalidade
-taxa-mortalidade
+8
+786
+180
+819
+prob-exposicao
+prob-exposicao
 0
 100
 50.0
@@ -645,20 +621,35 @@ taxa-mortalidade
 HORIZONTAL
 
 TEXTBOX
-37
-487
-187
-515
-falta implementar tempo de vida  e quarentena
+11
+822
+248
+850
+Probabilidade de exposição ao virus (%)
 11
 0.0
 1
+
+SLIDER
+8
+376
+180
+409
+taxa-mortalidade
+taxa-mortalidade
+0
+100
+50.0
+1
+1
+%
+HORIZONTAL
 
 MONITOR
-1080
-346
-1175
-391
+839
+44
+934
+89
 Nº Mortos (rip)
 num_mortos
 17
@@ -666,10 +657,10 @@ num_mortos
 11
 
 MONITOR
-1078
-130
-1194
-175
+425
+43
+541
+88
 Nº Expostos (azul)
 count populacao with [exposto?]
 17
@@ -677,10 +668,10 @@ count populacao with [exposto?]
 11
 
 MONITOR
-1076
-209
-1219
-254
+544
+44
+687
+89
 Nº Imunes (cinza)
 count populacao with [recuperado?]
 17
@@ -688,10 +679,10 @@ count populacao with [recuperado?]
 11
 
 SLIDER
-612
-663
-789
-696
+8
+334
+185
+367
 periodo-imunidade
 periodo-imunidade
 0
@@ -703,21 +694,21 @@ dias
 HORIZONTAL
 
 SWITCH
-1085
 469
-1218
-502
+727
+602
+760
 ver-contactos
 ver-contactos
-1
+0
 1
 -1000
 
 SLIDER
-31
-412
-203
-445
+10
+449
+182
+482
 prob-quarentena
 prob-quarentena
 0
@@ -729,25 +720,25 @@ prob-quarentena
 HORIZONTAL
 
 SLIDER
-28
-562
-200
-595
+7
+560
+179
+593
 raio_influencia
 raio_influencia
 0
 4
-1.5
+4.0
 1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-1111
-562
-1300
-595
+637
+727
+826
+760
 Mostrar/Esconder Contactos
 Show-hide-switch
 NIL
@@ -760,22 +751,182 @@ NIL
 NIL
 1
 
-BUTTON
-185
-96
-318
-129
-NIL
-instalar-populacao
-NIL
+TEXTBOX
+13
+10
+163
+29
+Comandos
+15
+0.0
 1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
+
+TEXTBOX
+12
+147
+263
+167
+Configurações Basicas
+15
+0.0
 1
+
+TEXTBOX
+11
+426
+196
+464
+Configurações avançadas
+15
+0.0
+1
+
+TEXTBOX
+13
+484
+198
+502
+Probabilidade de Quarentena (%)
+10
+0.0
+1
+
+TEXTBOX
+11
+540
+200
+558
+Periodo de Quarentena (1-20 dias)
+10
+0.0
+1
+
+TEXTBOX
+12
+594
+162
+612
+Raio de transmissão(0-4 metro)
+10
+0.0
+1
+
+TEXTBOX
+11
+649
+208
+667
+Probabilidade de Transmissão (%)
+10
+0.0
+1
+
+TEXTBOX
+12
+707
+186
+725
+Probabilidade de Recuperação (%)
+10
+0.0
+0
+
+TEXTBOX
+547
+769
+863
+807
+Definições de Visualização
+15
+0.0
+1
+
+TEXTBOX
+542
+16
+785
+54
+Informação Pandemica
+15
+0.0
+1
+
+TEXTBOX
+1173
+56
+1323
+75
+Evolução Gráfica
+15
+0.0
+1
+
+PLOT
+1017
+99
+1426
+298
+Evolucao_SEIR
+Tempo
+%
+0.0
+100.0
+0.0
+100.0
+true
+true
+"" ""
+PENS
+"Suscetivel" 1.0 0 -11085214 true "" "plot (count populacao with [not infetado? and not recuperado? and not exposto?]) / (count populacao) * 100"
+"Infetados" 1.0 0 -2674135 true "" "plot (count populacao with [infetado?]) / (count populacao) * 100"
+"Recuperados" 1.0 0 -7500403 true "" "plot (count populacao with [recuperado?]) / (count populacao) * 100"
+"Expostos" 1.0 0 -13345367 true "" "plot (count populacao with [exposto?])/(count populacao) * 100"
+
+TEXTBOX
+1017
+528
+1167
+546
+Reinfetados\n
+12
+0.0
+1
+
+PLOT
+1016
+326
+1425
+521
+Evolucao_mortes
+Tempo
+Numero
+0.0
+100.0
+0.0
+100.0
+false
+false
+"" ""
+PENS
+"Mortes" 1.0 0 -955883 true "" "plot num_mortos"
+
+PLOT
+1016
+544
+1427
+737
+Media de retransmissão
+Tempo
+Media
+0.0
+100.0
+0.0
+100.0
+false
+false
+"" ""
+PENS
+"Average degree" 1.0 0 -2674135 true "" "set-current-plot-pen \"Average degree\"\n  let degree_sum 0\n  ask turtles\n  [\n    set degree_sum degree_sum + count my-links\n   ]\n  plot ( degree_sum / count turtles)"
 
 @#$#@#$#@
 ## WHAT IS IT?
