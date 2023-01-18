@@ -94,6 +94,7 @@ to simular
   interagir-agentes
   virus-check
   movimentar-agentes
+  ver-relacoes
   tick
 end
 
